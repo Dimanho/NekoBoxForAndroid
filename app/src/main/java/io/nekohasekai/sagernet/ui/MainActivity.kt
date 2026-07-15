@@ -61,6 +61,28 @@ class MainActivity : ThemedActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // --- НАЧАЛО КАСТОМНОГО КОДА КЛУБНИКИ С ГОРЧИЦЕЙ ---
+        val prefs = getSharedPreferences("StrawberryVpnPrefs", android.content.Context.MODE_PRIVATE)
+        if (!prefs.getBoolean("is_first_run_sub_added", false)) {
+            runOnDefaultDispatcher {
+                try {
+                    val group = ProxyGroup(type = GroupType.SUBSCRIPTION)
+                    group.name = "VPN Подписка"
+                    val subscription = SubscriptionBean()
+                    subscription.link = "http://84.252.75.234/sub/ru-fin-nl.json"
+                    group.subscription = subscription
+
+                    GroupManager.createGroup(group)
+                    GroupUpdater.startUpdate(group, true) // Автоматически загружаем узлы
+
+                    prefs.edit().putBoolean("is_first_run_sub_added", true).apply()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+        // --- КОНЕЦ КАСТОМНОГО КОДА ---
+
         binding = LayoutMainBinding.inflate(layoutInflater)
         binding.fab.initProgress(binding.fabProgress)
         if (themeResId !in intArrayOf(
