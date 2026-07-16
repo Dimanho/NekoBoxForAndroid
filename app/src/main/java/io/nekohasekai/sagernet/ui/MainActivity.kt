@@ -59,45 +59,29 @@ class MainActivity : ThemedActivity(),
     lateinit var navigation: NavigationView
 
     override fun onCreate(savedInstanceState: Bundle?) {
-                super.onCreate(savedInstanceState)
+        super.onCreate(savedInstanceState)
 
-        val prefs = getSharedPreferences("SubPrefs", 0)
-        if (!prefs.getBoolean("is_loaded", false)) {
-            io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher {
-                try {
-                    val group = io.nekohasekai.sagernet.database.ProxyGroup(type = io.nekohasekai.sagernet.GroupType.SUBSCRIPTION)
-                    group.name = "VPN Подписка"
-                    group.subscription = io.nekohasekai.sagernet.database.SubscriptionBean().apply {
-                        link = "http://84.252.75.234/sub/ru-fin-nl.json"
-                    }
-                    io.nekohasekai.sagernet.database.GroupManager.createGroup(group)
-                    io.nekohasekai.sagernet.group.GroupUpdater.startUpdate(group, true)
-                    prefs.edit().putBoolean("is_loaded", true).apply()
-                } catch (e: Exception) { e.printStackTrace() }
-            }
-        }
-
-        // --- РќРђР§РђР›Рћ РљРђРЎРўРћРњРќРћР“Рћ РљРћР”Рђ РљР›РЈР‘РќРРљР РЎ Р“РћР Р§РР¦Р•Р™ ---
-        val prefs = getSharedPreferences("StrawberryVpnPrefs", android.content.Context.MODE_PRIVATE)
-        if (!prefs.getBoolean("is_first_run_sub_added", false)) {
+        // --- ВШИТАЯ ПОДПИСКА ---
+        val prefs = getSharedPreferences("VpnSubPrefs", android.content.Context.MODE_PRIVATE)
+        if (!prefs.getBoolean("is_first_run_sub", false)) {
             runOnDefaultDispatcher {
                 try {
                     val group = ProxyGroup(type = GroupType.SUBSCRIPTION)
-                    group.name = "VPN РџРѕРґРїРёСЃРєР°"
+                    group.name = "VPN Подписка"
                     val subscription = SubscriptionBean()
                     subscription.link = "http://84.252.75.234/sub/ru-fin-nl.json"
                     group.subscription = subscription
 
                     GroupManager.createGroup(group)
-                    GroupUpdater.startUpdate(group, true) // РђРІС‚РѕРјР°С‚РёС‡РµСЃРєРё Р·Р°РіСЂСѓР¶Р°РµРј СѓР·Р»С‹
+                    GroupUpdater.startUpdate(group, true)
 
-                    prefs.edit().putBoolean("is_first_run_sub_added", true).apply()
+                    prefs.edit().putBoolean("is_first_run_sub", true).apply()
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
             }
         }
-        // --- РљРћРќР•Р¦ РљРђРЎРўРћРњРќРћР“Рћ РљРћР”Рђ ---
+        // --- КОНЕЦ КОДА ПОДПИСКИ ---
 
         binding = LayoutMainBinding.inflate(layoutInflater)
         binding.fab.initProgress(binding.fabProgress)
@@ -148,7 +132,7 @@ class MainActivity : ThemedActivity(),
             val checkPermission =
                 ContextCompat.checkSelfPermission(this@MainActivity, POST_NOTIFICATIONS)
             if (checkPermission != PackageManager.PERMISSION_GRANTED) {
-                //еЉЁжЂЃз”іиЇ·
+                //动态申请
                 ActivityCompat.requestPermissions(
                     this@MainActivity, arrayOf(POST_NOTIFICATIONS), 0
                 )
@@ -385,7 +369,7 @@ class MainActivity : ThemedActivity(),
 
             R.id.nav_about -> displayFragment(AboutFragment())
             R.id.nav_tuiguang -> {
-                launchCustomTab("https://neko-box.pages.dev/е–µ")
+                launchCustomTab("https://neko-box.pages.dev/喵")
                 return false
             }
 
